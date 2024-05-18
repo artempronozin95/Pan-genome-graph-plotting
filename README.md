@@ -26,6 +26,12 @@ The input data should have the following format (it is best to use Orthofinder r
 |  OG0000001 |	2	       | 0          | 2	        | 1	        |  0	      | 5     |
 |  OG0000002 | 0	       | 1	        | 1	        | 1	        | 2	        | 5     |
 
+## Run
+Example of run:
+```
+python pangenome_plot.py Orthogroups_small.tsv
+```
+
 The script performs 20 iterations of combining samples, to obtain the most accurate number of core and variable genes. 
 
 ## Results

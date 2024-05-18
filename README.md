@@ -29,7 +29,7 @@ The input data should have the following format (it is best to use Orthofinder r
 ## Run
 Example of run:
 ```
-python pangenome_plot.py Orthogroups_small.tsv
+python pangenome_plot.py Orthogroups.tsv
 ```
 
 The script performs 20 iterations of combining samples, to obtain the most accurate number of core and variable genes. 

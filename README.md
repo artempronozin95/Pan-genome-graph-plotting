@@ -46,4 +46,4 @@ As a result, you will get:
 + Files containing the core and variabel part for each iteration.
 
 + Visualization graph of the core and variable part of the pan-genome or pan-transcriptome. The x-axis shows the samples (organisms), the y-axis shows the number of orthogroups containing the core or variable part.
-![image1] 
+![image1](https://github.com/artempronozin95/Pan-genome-graph-plotting/blob/main/example/pangenome.png)

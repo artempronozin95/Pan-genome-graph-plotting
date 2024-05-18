@@ -11,6 +11,7 @@ You need too install the next Python packages:
 + sys
 + numpy
 + matplotlib
+
 Or you can use our Conda enviroment:
 ```
 conda env create --file env/programs.yaml

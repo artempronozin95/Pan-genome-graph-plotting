@@ -105,8 +105,8 @@ df_core.to_csv(str(path[0]) + '/core.tsv', sep='\t', index=False) # File with co
 # Building a plot of core and variable genes 
 plt.figure(figsize=(50,15))
 sns.set(style="white", color_codes=True)
-sns.pointplot(data=df_pangenome, x=df_pangenome["index"], y=df_pangenome['value'], linewidth=10, color="#720026", label='Variable', markers='')
-sns.pointplot(data=df_core, x=df_core["index"], y=df_core['value'], linewidth=10, color='#00725F', label='Core', markers='')
+sns.pointplot(data=df_pangenome, x=df_pangenome["index"], y=df_pangenome['value'], linewidth=10, color="#720026", label='Variable', markers='', errorbar=None)
+sns.pointplot(data=df_core, x=df_core["index"], y=df_core['value'], linewidth=10, color='#00725F', label='Core', markers='', errorbar=None)
 sns.boxplot(data=df_pangenome, x=df_pangenome['index'], y=df_pangenome['value'], width=0.2, hue=df_pangenome['index'], legend=False, palette="rocket")
 sns.stripplot(data=df_pangenome, x=df_pangenome['index'], y=df_pangenome['value'],
                    jitter=True,

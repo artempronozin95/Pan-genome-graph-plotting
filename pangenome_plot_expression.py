@@ -174,9 +174,9 @@ print('Count statistic')
 print('Count percent of samples (species)')
 percent, c, s, cl = core_varible(ortho_T, path[0]) # Count percent of samples (species) in orthogroup
 
-core = (percent['Number of orthogroups'].iloc[0]/len(ortho))*100
-shell = (percent['Number of orthogroups'].iloc[1:6].sum()/len(ortho))*100
-сloud = (percent['Number of orthogroups'].iloc[6].sum()/len(ortho))*100
+core = (percent['Number of genes'].iloc[0]/len(ortho))*100
+shell = (percent['Number of genes'].iloc[1:6].sum()/len(ortho))*100
+сloud = (percent['Number of genes'].iloc[6].sum()/len(ortho))*100
 structure = ['Core', 'Shell', 'Cloud']
 count = [round(core), round(shell), round(сloud)]
 
@@ -187,7 +187,7 @@ plt.savefig(str(path[0]) + '/pieplot.png', dpi = 250)
 
 frequencies = ['>10%', '10%', '30%', '50%', '70%', '90%', str(len(ortho_T))]
 percent_reversed = percent.iloc[::-1].reset_index(drop=True)
-values = percent_reversed['Number of orthogroups'].to_list()
+values = percent_reversed['Number of genes'].to_list()
 colors = ['#fecd7d', '#97b7d8', '#97b7d8', '#97b7d8', '#97b7d8', '#97b7d8', '#b97637']
 
 data = pd.DataFrame({

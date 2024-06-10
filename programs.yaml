@@ -7,9 +7,9 @@ dependencies:
   - python=3.6
   - pip
   - pip:
-    - pandas
+    - pandas=1.4.4
     - collection
-    - seaborn
+    - seaborn=0.13.0
     - sys
-    - numpy
-    - matplotlib
+    - numpy=1.22.3
+    - matplotlib=3.8.4

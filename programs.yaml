@@ -8,7 +8,7 @@ dependencies:
   - pip
   - pip:
     - pandas
-    - collections
+    - collection
     - seaborn
     - sys
     - numpy

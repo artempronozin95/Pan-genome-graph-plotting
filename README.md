@@ -28,15 +28,17 @@ The input data should have the following format for orthogroups (it is best to u
 
 For expression data the input data should have the following format:
 
-| Genes | SRR765127 |	SRR765129 | SRR765130 |	SRR765150 |	SRR765151 |	Total |
-| :---: | :---:     | :---:      |     :---: | :---:     | :---:     | :---: |
-| Gene1 |	10	       | 15	        | 36	        | 1	        | 1	        | 61     |
-| Gene2 |	20	       | 2          | 2227	        | 18	        |  0	      | 57     |
-| Gene3 | 0	       | 1	        | 1	        | 10	        | 269	        | 55     |
+| Genes | SRR765127 |	SRR765129 | SRR765130 |	SRR765150 |	SRR765151 |	
+| :---: | :---:     | :---:      |     :---: | :---:     | :---:     | 
+| Gene1 |	10	       | 15	        | 36	        | 1	        | 1	        | 
+| Gene2 |	20	       | 2          | 2227	        | 18	        |  0	   |
+| Gene3 | 0	       | 1	        | 1	        | 10	        | 269	        | 
 
 ## Run
 Example of run:
 ```
+python pangenome_plot_orthogroups.py Orthogroups.tsv
+OR
 python pangenome_plot_orthogroups.py Orthogroups.tsv
 ```
 The script performs 20 iterations of combining samples, to obtain the most accurate number of core and variable genes. 

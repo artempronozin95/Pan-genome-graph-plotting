@@ -1,7 +1,7 @@
 # Pan-genome graph plotting
 
 ## Introduction
-To date, there are only few programs that can detect the core and variable parts of the pan-genome and build graphs based on them. Those that exist are more suitable for Windows than for Linux. Thus, we have written a script that allows convenient and fast calculation of the number of variable and core genes for pan-genome and pan-transcriptome. The script works based on the results of the Orthofinder program or any other orthologous group search programs. This script can be run on any operating system because it is written in Python. 
+To date, there are only few programs that can detect the core and variable parts of the pan-genome and build graphs based on them. Those that exist are more suitable for Windows than for Linux. Thus, we have written a script that allows convenient and fast calculation of the number of variable and core genes for pan-genome and pan-transcriptome. The script works based on the results of the Orthofinder program or any other orthologous group search programs. Also it can work with expression data from Kallisto or same programs. This script can be run on any operating system because it is written in Python. 
 
 ## Installation 
 You need too install the next Python packages:
@@ -18,7 +18,7 @@ conda env create --file env/programs.yaml
 conda activate Pangenome
 ```
 ## Input
-The input data should have the following format (it is best to use Orthofinder results):
+The input data should have the following format for orthogroups (it is best to use Orthofinder results):
 
 | Orthogroup | SRR765127 |	SRR765129 | SRR765130 |	SRR765150 |	SRR765151 |	Total |
 |   :---:    | :---:     | :---:      |     :---: | :---:     | :---:     | :---: |
@@ -26,12 +26,19 @@ The input data should have the following format (it is best to use Orthofinder r
 |  OG0000001 |	2	       | 0          | 2	        | 1	        |  0	      | 5     |
 |  OG0000002 | 0	       | 1	        | 1	        | 1	        | 2	        | 5     |
 
+For expression data the input data should have the following format:
+
+| Genes | SRR765127 |	SRR765129 | SRR765130 |	SRR765150 |	SRR765151 |	Total |
+| :---: | :---:     | :---:      |     :---: | :---:     | :---:     | :---: |
+| Gene1 |	10	       | 15	        | 36	        | 1	        | 1	        | 61     |
+| Gene2 |	20	       | 2          | 2227	        | 18	        |  0	      | 57     |
+| Gene3 | 0	       | 1	        | 1	        | 10	        | 269	        | 55     |
+
 ## Run
 Example of run:
 ```
-python pangenome_plot.py Orthogroups.tsv
+python pangenome_plot_orthogroups.py Orthogroups.tsv
 ```
-
 The script performs 20 iterations of combining samples, to obtain the most accurate number of core and variable genes. 
 
 ## Results

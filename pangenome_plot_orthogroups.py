@@ -6,8 +6,28 @@ import numpy as np
 import sys
 from itertools import chain
 import warnings 
+import math
+from scipy import optimize
+from scipy.optimize import curve_fit 
 warnings.filterwarnings('ignore') 
 # This function form table that count percent of samples (species) in orthogroup 
+
+def power_law_alpha(N, k, a):
+    return k * N ** (-a)
+
+def model_func(N, tau, k, o):
+    return k * np.exp(-N/tau) + np.tan(o)
+
+def fit_exp_nonlinear(t, n):
+    opt_parms, parm_cov = optimize.curve_fit(model_func, t, n, maxfev=1000*len(t))
+    tau, k, o = opt_parms
+    return tau, k, o
+
+def fit_power_alpha(t, n):
+    opt_parms, parm_cov = optimize.curve_fit(power_law_alpha, t, n, maxfev=1000*len(t))
+    k,a = opt_parms
+    return k,a 
+
 def core_varible(x, path): 
     max_len = len(x)
     full_ort = 0
@@ -132,23 +152,52 @@ df_core['percent'] = abs((df_core['value'] / max(df_core['value']))* 100) # Perc
 df_pangenome.to_csv(str(path[0]) + '/variable.tsv', sep='\t', index=False) # File with variable genes at every interaction
 df_core.to_csv(str(path[0]) + '/core.tsv', sep='\t', index=False) # File with core genes at every interaction
 
+# Metric count
+
+gr = df_pangenome[['value']].groupby(df_pangenome['variable'])
+concatenated_df = pd.concat([group.reset_index(drop=True) for _, group in gr], axis=1, ignore_index=True)
+df_pangenome['value/len'] = df_pangenome['value']
+
+concatenated_df['median'] = concatenated_df.median(axis=1)
+concatenated_df['index'] = np.arange(len(ortho_T)+1)[1:]
+shifted_list = [0] + concatenated_df['median'].to_list()
+original_list_cut = concatenated_df['median'].to_list()
+shifted_list_cut = shifted_list
+result_list = [original_list_cut[i] - shifted_list_cut[i] for i in range(len(original_list_cut))]
+
+# EXPONENT LAW
+tau, k, o = fit_exp_nonlinear(concatenated_df['index'],result_list)
+#print(f"tau: {tau}")
+#print(f"Пересечение с осью Y: {k}")
+print(f"Number of new genes, tg(θ): {o}")
+fit_exp= model_func(concatenated_df['index'], tau, k, o)
+# POWER LAW
+k,a = fit_power_alpha(concatenated_df['index'],result_list)
+print(f"Slope of the line, α: {a}")
+#print(f"Пересечение с осью Y: {k}")
+fit_alpha= power_law_alpha(concatenated_df['index'], k, a)
+
+plt.figure(figsize=(20,10))
+plt.plot(concatenated_df['index'], result_list, 'o')
+plt.plot(concatenated_df['index'], fit_alpha, color='red', label='Exponential Decay Fit')
+plt.xlabel('Genome number')
+plt.ylabel('Number of genes')
+
+ax = plt.gca()
+plt.text(1, 0.92, f'α = {a}', transform=ax.transAxes, fontsize=12, style='italic', ha='right', va='top')
+plt.text(1, 0.98, f'tg(θ) = {o}', transform=ax.transAxes, fontsize=12, style='italic', ha='right', va='top')
+
+plt.savefig(str(path[0]) + '/alpha_exp.png', dpi = 250)
+
+
 # Building a plot of core and variable genes 
 plt.figure(figsize=(50,15))
 sns.set(style="white", color_codes=True)
 sns.pointplot(data=df_pangenome, x=df_pangenome["index"], y=df_pangenome['value'], linewidth= 10, color="#4177a1", label='Variable', markers='', errorbar=None)
 sns.pointplot(data=df_core, x=df_core["index"], y=df_core['value'], linewidth= 10, color='#b97637', label='Core',  markers='', errorbar=None)
 sns.boxplot(data=df_pangenome, x=df_pangenome['index'], y=df_pangenome['value'], width=0.2, hue=df_pangenome['index'], legend=False, palette='dark:#4177a1')
-sns.stripplot(data=df_pangenome, x=df_pangenome['index'], y=df_pangenome['value'],
-                   jitter=True,
-                   marker='o',
-                   alpha=0.5,
-                   color='black')
 sns.boxplot(data=df_core, x=df_core['index'], y=df_core['value'], width=0.2, hue=df_core['index'], legend=False, palette='dark:#b97637')
-sns.stripplot(data=df_core, x=df_core['index'], y=df_core['value'],
-                   jitter=True,
-                   marker='o',
-                   alpha=0.5,
-                   color='black')
+
 
 plt.legend(fontsize=30) 
 # Choosing range of xticks

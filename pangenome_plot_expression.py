@@ -6,7 +6,28 @@ import numpy as np
 import sys
 from itertools import chain
 import warnings 
+import math
+from scipy import optimize
+from scipy.optimize import curve_fit
 warnings.filterwarnings('ignore') 
+
+def power_law_alpha(N, k, a):
+    return k * N ** (-a)
+
+def model_func(N, tau, k, o):
+    return k * np.exp(-N/tau) + np.tan(o)
+
+def fit_exp_nonlinear(t, n):
+    opt_parms, parm_cov = optimize.curve_fit(model_func, t, n, maxfev=1000*len(t))
+    tau, k, o = opt_parms
+    return tau, k, o
+
+def fit_power_alpha(t, n):
+    opt_parms, parm_cov = optimize.curve_fit(power_law_alpha, t, n, maxfev=1000*len(t))
+    k,a = opt_parms
+    return k,a 
+
+
 # This function form table that count percent of samples (species) in orthogroup 
 def core_varible(x, path): 
     max_len = len(x)
@@ -71,7 +92,6 @@ def core_varible(x, path):
 
 ortho = pd.read_csv(sys.argv[1], sep='\t')
 path = sys.argv[1].rsplit('/', 1)
-
 ortho_T = ortho.T # Transpose dataframe
 header=ortho_T.iloc[0]
 number_of_samples = len(ortho_T.index) - 1 # Count number of samples 
@@ -132,23 +152,51 @@ df_core['percent'] = abs((df_core['value'] / max(df_core['value']))* 100) # Perc
 df_pangenome.to_csv(str(path[0]) + '/variable.tsv', sep='\t', index=False) # File with variable genes at every interaction
 df_core.to_csv(str(path[0]) + '/core.tsv', sep='\t', index=False) # File with core genes at every interaction
 
+# Metric count
+
+gr = df_pangenome[['value']].groupby(df_pangenome['variable'])
+concatenated_df = pd.concat([group.reset_index(drop=True) for _, group in gr], axis=1, ignore_index=True)
+df_pangenome['value/len'] = df_pangenome['value']
+
+concatenated_df['median'] = concatenated_df.median(axis=1)
+concatenated_df['index'] = np.arange(len(ortho_T)+1)[1:]
+shifted_list = [0] + concatenated_df['median'].to_list()
+original_list_cut = concatenated_df['median'].to_list()
+shifted_list_cut = shifted_list
+result_list = [original_list_cut[i] - shifted_list_cut[i] for i in range(len(original_list_cut))]
+
+# EXPONENT LAW
+tau, k, o = fit_exp_nonlinear(concatenated_df['index'],result_list)
+#print(f"tau: {tau}")
+#print(f"Пересечение с осью Y: {k}")
+print(f"Number of new genes, tg(θ): {o}")
+fit_exp= model_func(concatenated_df['index'], tau, k, o)
+# POWER LAW
+k,a = fit_power_alpha(concatenated_df['index'],result_list)
+print(f"Slope of the line, α: {a}")
+#print(f"Пересечение с осью Y: {k}")
+fit_alpha= power_law_alpha(concatenated_df['index'], k, a)
+
+plt.figure(figsize=(20,10))
+plt.plot(concatenated_df['index'], result_list, 'o')
+plt.plot(concatenated_df['index'], fit_alpha, color='red', label='Exponential Decay Fit')
+plt.xlabel('Genome number')
+plt.ylabel('Number of genes')
+
+ax = plt.gca()
+plt.text(1, 0.92, f'α = {a}', transform=ax.transAxes, fontsize=12, style='italic', ha='right', va='top')
+plt.text(1, 0.98, f'tg(θ) = {o}', transform=ax.transAxes, fontsize=12, style='italic', ha='right', va='top')
+
+plt.savefig(str(path[0]) + '/alpha_exp.png', dpi = 250)
+
 # Building a plot of core and variable genes 
 plt.figure(figsize=(50,15))
 sns.set(style="white", color_codes=True)
 sns.pointplot(data=df_pangenome, x=df_pangenome["index"], y=df_pangenome['value'], linewidth= 10, color="#4177a1", label='Variable', markers='', errorbar=None)
 sns.pointplot(data=df_core, x=df_core["index"], y=df_core['value'], linewidth= 10, color='#b97637', label='Core',  markers='', errorbar=None)
-sns.boxplot(data=df_pangenome, x=df_pangenome['index'], y=df_pangenome['value'], width=0.2, hue=df_pangenome['index'], legend=False, palette='dark:#4177a1')
-sns.stripplot(data=df_pangenome, x=df_pangenome['index'], y=df_pangenome['value'],
-                   jitter=True,
-                   marker='o',
-                   alpha=0.5,
-                   color='black')
-sns.boxplot(data=df_core, x=df_core['index'], y=df_core['value'], width=0.2, hue=df_core['index'], legend=False, palette='dark:#b97637')
-sns.stripplot(data=df_core, x=df_core['index'], y=df_core['value'],
-                   jitter=True,
-                   marker='o',
-                   alpha=0.5,
-                   color='black')
+sns.boxplot(data=df_pangenome, x=df_pangenome['index'], y=df_pangenome['value'], width=0.2, hue=df_pangenome['index'], legend=False, palette='light:#4177a1')
+sns.boxplot(data=df_core, x=df_core['index'], y=df_core['value'], width=0.2, hue=df_core['index'], legend=False, palette='light:#b97637')
+
 
 plt.legend(fontsize=30) 
 # Choosing range of xticks
@@ -174,6 +222,21 @@ print('Count statistic')
 print('Count percent of samples (species)')
 percent, c, s, cl = core_varible(ortho_T, path[0]) # Count percent of samples (species) in orthogroup
 
+core_file_id = open(str(path[0]) + '/core_ids.txt', 'w')
+with core_file_id as file:
+    for item in c:
+        file.write(item + '\n')
+
+shell_file_id = open(str(path[0]) + '/shell_ids.txt', 'w')
+with shell_file_id as file:
+    for item in s:
+        file.write(item + '\n')
+
+cloud_file_id = open(str(path[0]) + '/cloud_ids.txt', 'w')
+with cloud_file_id as file:
+    for item in cl:
+        file.write(item + '\n')
+
 core = (percent['Number of genes'].iloc[0]/len(ortho))*100
 shell = (percent['Number of genes'].iloc[1:6].sum()/len(ortho))*100
 сloud = (percent['Number of genes'].iloc[6].sum()/len(ortho))*100
@@ -195,14 +258,13 @@ data = pd.DataFrame({
     'Values': values,
     'Colors': colors
 })
-
 # Create a bar chart
 print('Create a bar plot')
 plt.subplots()
 plt.figure(figsize=(20,10))
-plt.bar(data['Frequency'], data['Values'], color=data['Colors'])
+plt.bar(data['Frequency'], ((data['Values']/sum(data['Values']))*100), color=data['Colors'])
 plt.xlabel('Frequency', fontsize=30)
-plt.ylabel('Number of genes', fontsize=30)
+plt.ylabel('Percent of genes', fontsize=30)
 plt.xticks(fontsize=30)
 plt.yticks(fontsize=30)
 plt.savefig(str(path[0]) + '/hist.png', dpi = 250)
@@ -219,20 +281,20 @@ ortho_T_small['sum'] = ortho_T_small['core_percent'] + ortho_T_small['shell_perc
 ortho_T_small.to_csv(str(path[0]) +'/core_shell_cloud.tsv', sep='\t')
 
 # Plotting a graph
-print('Plotting a proportion graph')
+#print('Plotting a proportion graph')
 width = 1  # Width of columns
 
 plt.subplots()
 plt.figure(figsize=(80,15))
 
 # Bottom part - Core genes
-plt.bar(ortho_T_small['index'], ortho_T_small['core_percent'], width, label='Core genes', color='#172540')
+plt.bar(ortho_T_small['index'], ortho_T_small['core_percent'], width, label='Core genes', color='#172540', ec="#172540")
 
 # Middle part - Shell genes
-plt.bar(ortho_T_small['index'], ortho_T_small['shell_percent'], width, bottom=ortho_T_small['core_percent'], label='Shell genes', color='#97b7d8')
+plt.bar(ortho_T_small['index'], ortho_T_small['shell_percent'], width, bottom=ortho_T_small['core_percent'], label='Shell genes', color='#97b7d8', ec="#97b7d8")
 
 # Top part - Cloud genes
-plt.bar(ortho_T_small['index'], ortho_T_small['cloud_percent'], width, bottom=ortho_T_small['core_percent'] + ortho_T_small['shell_percent'], label='Cloud genes', color='#fecd7d')
+plt.bar(ortho_T_small['index'], ortho_T_small['cloud_percent'], width, bottom=ortho_T_small['core_percent'] + ortho_T_small['shell_percent'], label='Cloud genes', color='#fecd7d', ec="#fecd7d")
 
 # Adding a legend
 plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=3, fontsize=50)
@@ -243,5 +305,3 @@ plt.yticks(fontsize=50)
 plt.xticks(ortho_T_small['index'], rotation=90)
 plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.3)
 plt.savefig(str(path[0]) + '/proportion.png', dpi = 300)
-
-

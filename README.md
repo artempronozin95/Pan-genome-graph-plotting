@@ -53,9 +53,16 @@ As a result, you will get:
 
 + Visualization graph of the core and variable part of the pan-genome or pan-transcriptome. The x-axis shows the samples (organisms), the y-axis shows the number of orthogroups containing the core or variable part.
 ![image1](https://github.com/artempronozin95/Pan-genome-graph-plotting/blob/main/example/pangenome.png)
+The program can provide information of the pan-transcriptome structure analysis.
++ 
 ![image2](https://github.com/artempronozin95/Pan-genome-graph-plotting/blob/main/example/hist.png)
++ To determine the type of pan-genome (open or closed), we used two metrics. This metrics were provided in ![manuscript](https://www.sciencedirect.com/science/article/pii/S1369527408001239)
+tg(θ) - represents the asymptotic prediction of the number of new genes that can be discovered with further genome sequencing. 
+α - refers to the exponent in the power law equation that determines whether the pan-genome is open (if α ≤ 1) or closed (if α > 1).
 ![image3](https://github.com/artempronozin95/Pan-genome-graph-plotting/blob/main/example/alpha_exp.png)
+
 ![image4](https://github.com/artempronozin95/Pan-genome-graph-plotting/blob/main/example/pieplot.png)
++ Analysis of the structure of the pan and core parts of the pan-transcriptome for each maize variety separately.
 ![image5](https://github.com/artempronozin95/Pan-genome-graph-plotting/blob/main/example/proportion.png)
 
 

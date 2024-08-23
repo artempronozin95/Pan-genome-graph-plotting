@@ -26,7 +26,7 @@ The input data should have the following format for orthogroups (it is best to u
 |  OG0000001 |	2	       | 0          | 2	        | 1	        |  0	      | 5     |
 |  OG0000002 | 0	       | 1	        | 1	        | 1	        | 2	        | 5     |
 
-For expression data the input data should have the following format:
+For expression data the input data should have the following format (the value can be TPM, FPKM, RPM, counts):
 
 | Genes | SRR765127 |	SRR765129 | SRR765130 |	SRR765150 |	SRR765151 |	
 | :---: | :---:     | :---:      |     :---: | :---:     | :---:     | 
@@ -39,9 +39,9 @@ Example of run:
 ```
 python pangenome_plot_orthogroups.py Orthogroups.tsv
 OR
-python pangenome_plot_orthogroups.py Orthogroups.tsv
+python pangenome_plot_expression.py expression_data.tsv
 ```
-The script performs 20 iterations of combining samples, to obtain the most accurate number of core and variable genes. 
+The script performs 10 iterations of combining samples, to obtain the most accurate number of core and variable genes. 
 
 ## Results
 As a result, you will get:
